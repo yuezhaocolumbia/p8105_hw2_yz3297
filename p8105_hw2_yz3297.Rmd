@@ -33,24 +33,45 @@ It is 1868*19 in dimension. This dataset is obviously not tidy because route has
 There are 465 distinct stations. (identified by name and line)
 
 
-
-
 ```{r}
     count(distinct(subway_data,station_name, line, ada), ada== TRUE)
 ```  
 
+
+There are 84 distinct stations which are ADA compliant.
+
 ```{r}
     count(subway_data, vending == "NO", entry == TRUE)
     count(subway_data, vending == "NO")
-```     
+    69/183
+```   
+
+The proportion of station entrances without vending allow entrance is 69 / 183= 0.377
+
 
 ```{r}
     subway_data = gather(subway_data, key = route_number , value = route_name, route1:route11)
 ```
+
+The code chunk above is to change the dataset from wide form to long form. 
+
 
 ```{r}
     count(distinct(subway_data, station_name, line, route_name), route_name == "A")
     count(distinct(subway_data, station_name, line, route_name, ada), route_name == "A" , ada== TRUE)
     
 ```
+
+There are 60 distinct stations serve the A train. Of the stations that serve the A train, 17 of them are ADA compliant. 
+
+
+##Problem 2
+```{r}
+trashwheel_data = 
+    read_excel("data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "Mr. Trash Wheel" , range = "A2:N337") 
+  
+```
+
+
+
 
