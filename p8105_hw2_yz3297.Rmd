@@ -4,8 +4,53 @@ author: "Yue Zhao"
 date: "10/03/2018"
 output: github_document
 ---
-
+##Problem 1
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r, results='hide'}
+
+  subway_data = 
+    read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
+    janitor::clean_names()  %>%
+    select(line, station_name, station_latitude, station_longitude, route1:route11 , entry, vending, entrance_type, ada) %>%
+    mutate(entry= if_else(entry == "YES", TRUE, FALSE))
+    
+``` 
+
+This code chunk was to read, clean, retain variables and change "entry" from character to logical.
+
+The dataset has 19 variables which are Line, Station_name, Station_latitude, Station_longitude, route1-route11 , Entry, Vending, Entrance_type, ADA compliance. 
+It is 1868*19 in dimension. This dataset is obviously not tidy because route has multiple variables. We need to transform the dataset from wide to long form.
+
+
+
+```{r}
+    count(distinct(subway_data,station_name, line)) 
+```
+
+There are 465 distinct stations. (identified by name and line)
+
+
+
+
+```{r}
+    count(distinct(subway_data,station_name, line, ada), ada== TRUE)
+```  
+
+```{r}
+    count(subway_data, vending == "NO", entry == TRUE)
+    count(subway_data, vending == "NO")
+```     
+
+```{r}
+    subway_data = gather(subway_data, key = route_number , value = route_name, route1:route11)
+```
+
+```{r}
+    count(distinct(subway_data, station_name, line, route_name), route_name == "A")
+    count(distinct(subway_data, station_name, line, route_name, ada), route_name == "A" , ada== TRUE)
+    
 ```
 
