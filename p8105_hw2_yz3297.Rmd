@@ -7,6 +7,7 @@ output: github_document
 ##Problem 1
 ```{r setup, include=FALSE}
 library(tidyverse)
+
 ```
 
 ```{r, results='hide'}
@@ -58,7 +59,7 @@ The code chunk above is to change the dataset from wide form to long form.
 
 ```{r}
     count(distinct(subway_data, station_name, line, route_name), route_name == "A")
-    count(distinct(subway_data, station_name, line, route_name, ada), route_name == "A" , ada== TRUE)
+    count(distinct(subway_data, station_name, line, route_name, ada), route_name == "A" , ada == TRUE)
     
 ```
 
@@ -67,11 +68,85 @@ There are 60 distinct stations serve the A train. Of the stations that serve the
 
 ##Problem 2
 ```{r}
-trashwheel_data = 
-    read_excel("data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "Mr. Trash Wheel" , range = "A2:N337") 
+library(readxl)
+
+  trashwheel_data = 
+      read_excel("data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "Mr. Trash Wheel" , range = "A2:N337") %>%
+      janitor::clean_names()  %>%
+      rename(weight = weight_tons, volume = volume_cubic_yards)   %>%
+      #read, clean names and rename weight and volume
+      
+      na.omit()  %>%
+      #omit the redundant observations
+    
+      mutate(sports_balls = as.integer(sports_balls))
+      #convert sports balls to an integer variable
   
+  trashwheel_data
+      
+```
+
+This code chunk is to read, clean names, rename weight and volume, omit the redundant observations and convert sports balls to an integer variable for Mr. Trash Wheel dataset. 
+
+
+```{r}     
+    precip2017_data=
+      read_excel("data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "2017 Precipitation" , range = "A2:B15") %>%
+      na.omit() %>%
+      mutate(year = 2017)
+      #read, clean data and add year= 2017
+      
+    precip2016_data=  
+      read_excel("data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", sheet = "2016 Precipitation" , range = "A2:B15") %>%
+      na.omit() %>% 
+      mutate(year = 2016)
+      #read, clean data and add year= 2016
+      
+    precip_data=
+      bind_rows(precip2017_data, precip2016_data) %>%
+      janitor::clean_names()  %>%
+      mutate(month = month.name[month])
+      #append the datasets, clean the names and convert month to a character variable
+  
+    precip_data
+   
+```
+
+This code chunk is to read the precipitation datasets and combine the datasets. 
+
+
+The description about the data (r inline code used): The number of observations in Mr. Trashwheel Dataset is `r count(trashwheel_data)`. The number of observations in the Precipitation Dataset is `r count(precip_data)`. 
+
+Key variables in Mr. Trashwheel Dataset are dumpster, month, weight, volume, sports balls. Key variables in Precipitation Dataset are month, total precipitation, year. 
+
+The total precipitation in 2017 is `r sum(precip2017_data$Total)`. The median number of sports balls in a dumpster in 2016 is `r median(filter(trashwheel_data,year== 2016)$sports_balls)`.
+
+
+##Problem 3
+
+```{r}  
+devtools::install_github("p8105/p8105.datasets")
+
+library(p8105.datasets)
+
+data(brfss_smart2010)
+head(brfss_smart2010)
+
+brfssnew_data=brfss_smart2010 %>%
+  janitor::clean_names()  %>%
+  filter(topic=="Overall Health")   %>%
+  select(year,locationabbr, locationdesc, response, data_value)%>%
+  spread(key=response, value= data_value ) %>%
+  #clean the names, filter the overall health topic, drop other variables and turning from long to wide
+  
+  janitor::clean_names()  %>%
+  mutate(exc_or_verygood= excellent + very_good )
+  #clean the names again after turning long to wide and create a new variable
+
 ```
 
 
+Answers to the questions (used inline code)
 
+There are `r count(distinct(brfssnew_data, locationdesc))` unique locations in the dataset.  There are `r count(distinct(brfssnew_data, locationabbr))` states represented, so 
 
