@@ -11,7 +11,7 @@ library(tidyverse)
 ```
 
 ```{r, results='hide'}
-
+  #read, clean, retain variables and change "entry" from character to logical
   subway_data = 
     read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>%
     janitor::clean_names()  %>%
@@ -26,12 +26,11 @@ The dataset has 19 variables which are Line, Station_name, Station_latitude, Sta
 It is 1868*19 in dimension. This dataset is obviously not tidy because route has multiple variables. We need to transform the dataset from wide to long form.
 
 
-
 ```{r}
     count(distinct(subway_data,station_name, line)) 
 ```
 
-There are 465 distinct stations. (identified by name and line)
+There are `r count(distinct(subway_data,station_name, line))` distinct stations. (identified by name and line)
 
 
 ```{r}
@@ -44,10 +43,10 @@ There are 84 distinct stations which are ADA compliant.
 ```{r}
     count(subway_data, vending == "NO", entry == TRUE)
     count(subway_data, vending == "NO")
-    69/183
+
 ```   
 
-The proportion of station entrances without vending allow entrance is 69 / 183= 0.377
+The proportion of station entrances without vending allow entrance is 69/183 `r 69/183`.
 
 
 ```{r}
@@ -137,7 +136,7 @@ brfssnew_data=brfss_smart2010 %>%
   filter(topic=="Overall Health")   %>%
   select(year,locationabbr, locationdesc, response, data_value)%>%
   spread(key=response, value= data_value ) %>%
-  #clean the names, filter the overall health topic, drop other variables and turning from long to wide
+  #clean the names, filter the overall health topic, drop other variables and turning data from long to wide
   
   janitor::clean_names()  %>%
   mutate(exc_or_verygood= excellent + very_good ) %>%
@@ -152,18 +151,52 @@ brfssnew_data
 
 Answers to the questions (used inline code for the numbers if no code chunk is showing)
 
-There are `r count(distinct(brfssnew_data, locationdesc))` unique locations in the dataset.  There are `r count(distinct(brfssnew_data, locationabbr))` location abbreviations for states (or district), so we know all 50 states and Washington DC were represented.  
+There are `r count(distinct(brfssnew_data, locationdesc))` unique locations in the dataset (if counting the NAs, it is 404).  There are `r count(distinct(brfssnew_data, locationabbr))` location abbreviations for states (or district), so we know all 50 states and Washington DC were represented.  
 
 ```{r}
-which.max(table((brfssnew_data$locationabbr)))
+count(brfssnew_data, locationabbr)
 ```
 
-The state which has the most observation is New Jersey. It appeared 32 times. 
+The state which has the most observation is New Jersey. It appeared `r max(count(brfssnew_data, locationabbr)$n)` times. (The two NAs are taken out so it could also be 146)
 
 In 2002, the median of the Excellent response value is `r median(filter(brfssnew_data,year==2002)$excellent)`.
 
 ```{r}
 ggplot(filter(brfssnew_data,year==2002), aes(x = excellent)) + 
   geom_histogram()
+  #histogram
 ```
+
+Histogram of Excellent response values in 2002
+
+```{r}
+  county_data1= filter(brfssnew_data, locationdesc=="NY - New York County") %>%
+            select(year, excellent) %>%
+            rename(excellent_NY = excellent)
+  #subseting the New York County data
+
+  county_data2 = filter(brfssnew_data, locationdesc=="NY - Queens County")%>%
+            select(year, excellent) %>%
+            rename(excellent_QC = excellent)
+  #subseting the Queens County data
+  
+  county_data =left_join(county_data1,county_data2, by = "year")
+  #combine the data
+       
+  ggplot(county_data, aes(x = excellent_NY, y = excellent_QC)) + geom_point()
+  #scatter plot
+       
+```
+
+Scatter Plot of Execellent response values in New York County and Queens County from 2002 to 2010. (There are 9 points)
+
+
+
+
+
+
+
+
+
+
 
