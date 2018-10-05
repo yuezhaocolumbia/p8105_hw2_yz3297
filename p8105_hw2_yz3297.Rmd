@@ -140,13 +140,30 @@ brfssnew_data=brfss_smart2010 %>%
   #clean the names, filter the overall health topic, drop other variables and turning from long to wide
   
   janitor::clean_names()  %>%
-  mutate(exc_or_verygood= excellent + very_good )
+  mutate(exc_or_verygood= excellent + very_good ) %>%
   #clean the names again after turning long to wide and create a new variable
 
+  na.omit()
+  #omit the na
+
+brfssnew_data
 ```
 
 
-Answers to the questions (used inline code)
+Answers to the questions (used inline code for the numbers if no code chunk is showing)
 
-There are `r count(distinct(brfssnew_data, locationdesc))` unique locations in the dataset.  There are `r count(distinct(brfssnew_data, locationabbr))` states represented, so 
+There are `r count(distinct(brfssnew_data, locationdesc))` unique locations in the dataset.  There are `r count(distinct(brfssnew_data, locationabbr))` location abbreviations for states (or district), so we know all 50 states and Washington DC were represented.  
+
+```{r}
+which.max(table((brfssnew_data$locationabbr)))
+```
+
+The state which has the most observation is New Jersey. It appeared 32 times. 
+
+In 2002, the median of the Excellent response value is `r median(filter(brfssnew_data,year==2002)$excellent)`.
+
+```{r}
+ggplot(filter(brfssnew_data,year==2002), aes(x = excellent)) + 
+  geom_histogram()
+```
 
